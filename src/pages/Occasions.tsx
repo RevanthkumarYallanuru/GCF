@@ -85,6 +85,7 @@ const Occasions = () => {
 
   return (
     <div className="min-h-screen">
+      <Header />
       <Helmet>
         <title>Gift Occasions | Personalized Gifts for Every Celebration | GCF Gifts</title>
         <meta name="description" content="Discover perfect personalized gifts for birthdays, anniversaries, weddings, graduations, and corporate events. Custom photo gifts with fast delivery in Tirupati." />

@@ -1,8 +1,11 @@
 import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export function HeroSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-card to-background">
       <div className="container py-12 md:py-20">
@@ -23,10 +26,19 @@ export function HeroSection() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gradient-primary glow-primary text-primary-foreground font-semibold px-8">
+              <Button 
+                size="lg" 
+                className="gradient-primary glow-primary text-primary-foreground font-semibold px-8"
+                onClick={() => navigate("/products")}
+              >
                 Shop Now
               </Button>
-              <Button size="lg" variant="outline" className="border-primary/50 hover:bg-primary/10">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-primary/50 hover:bg-primary/10"
+                onClick={() => navigate("/track-order")}
+              >
                 Track Order
               </Button>
             </div>

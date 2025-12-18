@@ -1,8 +1,9 @@
 import { Search, ShoppingCart, User } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
+import { useState } from "react";
 
 // Main navigation header component
 // Provides site branding, navigation links, search, and cart functionality
@@ -12,6 +13,16 @@ import { useCart } from "@/contexts/CartContext";
 export function Header() {
   const { state } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   // Hide header on admin pages for better admin experience
   if (location.pathname.startsWith('/admin')) {
@@ -47,13 +58,15 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <div className="relative hidden md:block">
+          <form onSubmit={handleSearch} className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search for gifts..."
               className="w-64 pl-10 bg-secondary border-border"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
           <Link to="/checkout">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />

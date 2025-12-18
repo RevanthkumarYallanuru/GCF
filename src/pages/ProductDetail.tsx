@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Star, Truck, Shield, Clock, Upload, ChevronRight, Check } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { Helmet } from "react-helmet";
 
 const sizes = [
   { id: "4x6", label: "A4 (4x6\")" },
@@ -46,8 +47,51 @@ const ProductDetail = () => {
     });
   };
 
+  // SEO structured data for product page
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "The Eternal Memory Frame",
+    "image": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=600&h=600&fit=crop",
+    "description": "Premium personalized photo frame crafted from sustainably sourced premium oak wood. Museum-grade archival paper and high-fidelity inks ensure photos stay vibrant for generations.",
+    "brand": {
+      "@type": "Brand",
+      "name": "GCF Gifts"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://gcfgifts.com/product/${id}`,
+      "priceCurrency": "INR",
+      "price": "899",
+      "priceValidUntil": "2025-12-31",
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "128"
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>The Eternal Memory Frame - Premium Personalized Photo Frame | GCF Gifts</title>
+        <meta name="description" content="Premium personalized photo frame crafted from sustainably sourced premium oak wood. Museum-grade archival paper and high-fidelity inks. Perfect for wedding photos, family portraits, or artistic prints." />
+        <meta name="keywords" content="photo frame, personalized frame, custom frame, oak wood frame, museum grade frame, wedding frame, family portrait frame" />
+        <meta property="og:title" content="The Eternal Memory Frame - Premium Personalized Photo Frame" />
+        <meta property="og:description" content="Premium personalized photo frame with museum-grade quality. Perfect for preserving your most cherished memories." />
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={`https://gcfgifts.com/product/${id}`} />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=600&h=600&fit=crop" />
+        <meta property="product:price:amount" content="899" />
+        <meta property="product:price:currency" content="INR" />
+        <link rel="canonical" href={`https://gcfgifts.com/product/${id}`} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
       <Header />
       <main className="flex-1 py-8">
         <div className="container">

@@ -175,6 +175,7 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const searchQuery = searchParams.get("search") || "";
 
   // Update URL params when filters change
   useEffect(() => {
@@ -188,13 +189,19 @@ const Products = () => {
 
   // Filter products based on current selections
   const filteredProducts = allProducts.filter(product => {
+    // Search filter
+    const matchesSearch = !searchQuery || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
     const matchesOccasion = selectedOccasion === "all" || product.occasion === selectedOccasion;
     const matchesSize = selectedSize === "all" || product.size === selectedSize;
     const matchesArtStyle = selectedArtStyle === "all" || product.artStyle === selectedArtStyle;
     const matchesFrameType = selectedFrameType === "all" || product.frameType === selectedFrameType;
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
 
-    return matchesOccasion && matchesSize && matchesArtStyle && matchesFrameType && matchesPrice;
+    return matchesSearch && matchesOccasion && matchesSize && matchesArtStyle && matchesFrameType && matchesPrice;
   });
 
   // Sort products
@@ -275,10 +282,28 @@ const Products = () => {
         <div className="container">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Photo Frames Collection</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              {searchQuery ? `Search Results for "${searchQuery}"` : "Photo Frames Collection"}
+            </h1>
             <p className="text-lg text-muted-foreground">
-              Discover our premium collection of personalized photo frames for every occasion
+              {searchQuery 
+                ? `Found ${sortedProducts.length} product${sortedProducts.length !== 1 ? 's' : ''} matching your search`
+                : "Discover our premium collection of personalized photo frames for every occasion"}
             </p>
+            {searchQuery && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4"
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams);
+                  params.delete("search");
+                  setSearchParams(params);
+                }}
+              >
+                Clear Search
+              </Button>
+            )}
           </div>
 
           <div className="flex gap-8">

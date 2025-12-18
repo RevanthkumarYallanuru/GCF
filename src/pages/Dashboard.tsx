@@ -88,6 +88,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>My Dashboard | Order History & Account Management | GCF Gifts</title>
+        <meta name="description" content="Manage your orders, track deliveries, update personal details, and view order history. Your personalized gift account dashboard." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Header />
       <main className="flex-1 py-8">
         <div className="container">

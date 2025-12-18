@@ -14,10 +14,21 @@ import { Helmet } from "react-helmet";
 
 const TrackOrder = () => {
   const [orderId, setOrderId] = useState("");
-  const [trackingInfo, setTrackingInfo] = useState(null);
+  const [trackingInfo, setTrackingInfo] = useState<{
+    orderId: string;
+    status: string;
+    estimatedDelivery: string;
+    currentLocation: string;
+    timeline: Array<{
+      status: string;
+      time: string;
+      date: string;
+      completed: boolean;
+    }>;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTrack = (e) => {
+  const handleTrack = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 

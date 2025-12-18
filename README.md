@@ -104,14 +104,30 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+This project can be deployed to various platforms:
 
-## Can I connect a custom domain to my Lovable project?
+### Vercel (Recommended)
+1. Push your code to GitHub
+2. Import your repository in [Vercel](https://vercel.com)
+3. Configure build settings:
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+4. Deploy!
 
-Yes, you can!
+### Netlify
+1. Connect your GitHub repository to [Netlify](https://netlify.com)
+2. Set build command: `npm run build`
+3. Set publish directory: `dist`
+4. Deploy!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Custom Server
+1. Build the project: `npm run build`
+2. Serve the `dist` folder using any static hosting service
+3. Configure your web server to handle client-side routing
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Custom Domain Setup
+- **Vercel**: Add your domain in Project Settings > Domains
+- **Netlify**: Configure custom domain in Site Settings > Domain Management
+- **Other platforms**: Follow your hosting provider's documentation for custom domain configuration

@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { Helmet } from "react-helmet";
 
 const Checkout = () => {
   const { state, updateQuantity, removeItem, clearCart } = useCart();
@@ -106,6 +107,11 @@ const Checkout = () => {
   if (state.items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
+        <Helmet>
+          <title>Checkout | Secure Payment & Fast Delivery | GCF Gifts</title>
+          <meta name="description" content="Complete your gift purchase with secure payment options. Fast delivery available in Tirupati with multiple payment methods including UPI, cards, and net banking." />
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -122,6 +128,11 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Checkout | Secure Payment & Fast Delivery | GCF Gifts</title>
+        <meta name="description" content="Complete your gift purchase with secure payment options. Fast delivery available in Tirupati with multiple payment methods including UPI, cards, and net banking." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <Header />
       <main className="flex-1 py-8">
         <div className="container max-w-6xl">
