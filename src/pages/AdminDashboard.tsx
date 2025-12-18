@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -20,14 +21,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AdminOrders } from "@/components/admin/AdminOrders";
+import { AdminInventory } from "@/components/admin/AdminInventory";
+import { AdminDelivery } from "@/components/admin/AdminDelivery";
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
+import { AdminCustomers } from "@/components/admin/AdminCustomers";
 
 const sidebarItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: ShoppingBag, label: "Orders", active: false },
-  { icon: Package, label: "Inventory", active: false },
-  { icon: Truck, label: "Delivery", active: false },
-  { icon: BarChart3, label: "Analytics", active: false },
-  { icon: Users, label: "Customers", active: false },
+  { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
+  { icon: ShoppingBag, label: "Orders", id: "orders" },
+  { icon: Package, label: "Inventory", id: "inventory" },
+  { icon: Truck, label: "Delivery", id: "delivery" },
+  { icon: BarChart3, label: "Analytics", id: "analytics" },
+  { icon: Users, label: "Customers", id: "customers" },
 ];
 
 const stats = [
@@ -70,6 +76,211 @@ const riskOrders = [
 ];
 
 const AdminDashboard = () => {
+  const [activeView, setActiveView] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    navigate("/admin-login");
+  };
+
+  const renderContent = () => {
+    switch (activeView) {
+      case "orders":
+        return <AdminOrders />;
+      case "inventory":
+        return <AdminInventory />;
+      case "delivery":
+        return <AdminDelivery />;
+      case "analytics":
+        return <AdminAnalytics />;
+      case "customers":
+        return <AdminCustomers />;
+      default:
+        return (
+          <>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {stats.map((stat, index) => (
+                <div key={index} className="bg-card p-6 rounded-xl border border-border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
+                    {stat.positive !== undefined && (
+                      <Badge variant={stat.positive ? "default" : "destructive"} className="text-xs">
+                        {stat.change}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-2xl font-bold mb-1">{stat.value}</div>
+                  {stat.subtext && (
+                    <div className="text-xs text-muted-foreground">{stat.subtext}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Pending Approvals */}
+              <div className="lg:col-span-2 bg-card p-6 rounded-xl border border-border">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">Pending Photo Approvals</h3>
+                  <Badge className="bg-yellow-100 text-yellow-800">5 Pending</Badge>
+                </div>
+                <div className="space-y-4">
+                  {pendingApprovals.map((approval) => (
+                    <div key={approval.id} className="flex items-center gap-4 p-4 rounded-lg border border-border">
+                      <img
+                        src={approval.image}
+                        alt={approval.product}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium">{approval.product}</h4>
+                        <p className="text-sm text-muted-foreground">{approval.customer}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground">{approval.uploadedAgo}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {approval.resolution}
+                          </Badge>
+                          {approval.warning && (
+                            <Badge variant="destructive" className="text-xs">
+                              {approval.warning}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-right">
+                          <div className="text-sm font-medium">Quality Score</div>
+                          <div className="text-xs text-muted-foreground">{approval.quality}/100</div>
+                        </div>
+                        <Progress value={approval.quality} className="w-20 h-2" />
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <X className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm">
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Delivery Status */}
+              <div className="space-y-6">
+                <div className="bg-card p-6 rounded-xl border border-border">
+                  <h3 className="text-lg font-semibold mb-4">Active Deliveries</h3>
+                  <div className="space-y-3">
+                    {deliveryOrders.map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div>
+                          <div className="font-medium text-sm">Order #{order.id}</div>
+                          <div className="text-xs text-muted-foreground">{order.rider}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{order.time || order.status}</div>
+                          <Badge variant="outline" className="text-xs">
+                            {order.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-card p-6 rounded-xl border border-border">
+                  <h3 className="text-lg font-semibold mb-4">Risk Alerts</h3>
+                  <div className="space-y-3">
+                    {riskOrders.map((risk) => (
+                      <div key={risk.id} className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-200">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">Order #{risk.id}</div>
+                          <div className="text-xs text-red-600">{risk.issue}</div>
+                        </div>
+                        <Button size="sm" variant="outline" className="text-red-600 border-red-300">
+                          Resolve
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-card p-6 rounded-xl border border-border">
+                  <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Phone className="h-4 w-4 mr-2" />
+                      Contact Rider
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Send Notification
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <Clock className="h-4 w-4 mr-2" />
+                      Update ETA
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Section */}
+            <div className="grid lg:grid-cols-2 gap-6 mt-6">
+              <div className="bg-card p-6 rounded-xl border border-border">
+                <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div className="space-y-3">
+                  {[
+                    { action: "New order received", time: "2 mins ago", type: "order" },
+                    { action: "Photo approved for order #8821", time: "14 mins ago", type: "approval" },
+                    { action: "Delivery completed for order #8619", time: "1 hour ago", type: "delivery" },
+                    { action: "Low stock alert: Custom Frames", time: "2 hours ago", type: "alert" },
+                  ].map((activity, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{activity.action}</div>
+                        <div className="text-xs text-muted-foreground">{activity.time}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-card p-6 rounded-xl border border-border">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">Customer Feedback</h3>
+                  <Badge className="bg-primary/20 text-primary">4.9 ★</Badge>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { name: "Priya S.", rating: 5, comment: "Amazing quality and super fast delivery!" },
+                    { name: "Rahul M.", rating: 4, comment: "Good product, packaging could be better." },
+                  ].map((feedback, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{feedback.name}</span>
+                        <div className="flex">
+                          {Array(feedback.rating).fill(0).map((_, j) => (
+                            <span key={j} className="text-yellow-400">★</span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{feedback.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
@@ -82,11 +293,12 @@ const AdminDashboard = () => {
         </div>
 
         <nav className="flex-1 space-y-1">
-          {sidebarItems.map((item, index) => (
+          {sidebarItems.map((item) => (
             <button
-              key={index}
+              key={item.id}
+              onClick={() => setActiveView(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                item.active
+                activeView === item.id
                   ? "bg-primary/10 text-primary"
                   : "hover:bg-muted/50 text-muted-foreground"
               }`}
@@ -98,280 +310,41 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="border-t border-border pt-4 space-y-1">
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:bg-muted/50 rounded-lg">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-muted/50 text-muted-foreground">
             <Settings className="h-5 w-5" />
-            <span>Settings</span>
+            <span className="font-medium">Settings</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-destructive rounded-lg">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors hover:bg-red-50 text-red-600"
+          >
             <LogOut className="h-5 w-5" />
-            <span>Logout</span>
+            <span className="font-medium">Logout</span>
           </button>
-        </div>
-
-        <div className="mt-4 p-3 rounded-lg bg-muted/50">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-sm font-bold text-primary">A</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">admin@gcf.com</p>
-            </div>
-          </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-auto">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-8">
+      <main className="flex-1 p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Overview</h1>
-            <p className="text-muted-foreground">Here's what's happening in Tirupati today.</p>
+            <h1 className="text-2xl font-bold capitalize">{activeView}</h1>
+            <p className="text-muted-foreground">
+              {activeView === "dashboard" ? "Welcome back! Here's what's happening today." : `Manage ${activeView}`}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search Order ID, Customer Name, or Product..."
-                className="w-96 pl-10 bg-card border-border"
-              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search..." className="pl-10 w-64" />
             </div>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-                3
-              </span>
+            <Button variant="outline" size="icon">
+              <Bell className="h-4 w-4" />
             </Button>
           </div>
-        </header>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="p-4 rounded-xl bg-card border border-border">
-              <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">{stat.value}</span>
-                {stat.change && (
-                  <span className={`text-sm ${stat.positive ? "text-primary" : "text-destructive"}`}>
-                    {stat.change}
-                  </span>
-                )}
-              </div>
-              {stat.subtext && (
-                <p className="text-xs text-muted-foreground mt-1">{stat.subtext}</p>
-              )}
-            </div>
-          ))}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Pending Photo Approvals */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Pending Photo Approvals</h2>
-              <Button variant="link" className="text-primary">View All (5)</Button>
-            </div>
-
-            {pendingApprovals.map((approval) => (
-              <div key={approval.id} className="p-4 rounded-xl bg-card border border-border">
-                <div className="flex gap-4">
-                  <div className="relative">
-                    <img
-                      src={approval.image}
-                      alt="Customer photo"
-                      className="w-24 h-24 rounded-lg object-cover"
-                    />
-                    {approval.warning && (
-                      <Badge className="absolute -top-2 -right-2 bg-yellow-500 text-black text-[10px]">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Low Res
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">Order #{approval.id}</h3>
-                      {approval.warning && (
-                        <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">
-                          {approval.warning}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{approval.product}</p>
-                    <p className="text-sm">
-                      Customer: <span className="text-primary">{approval.customer}</span> • Uploaded {approval.uploadedAgo}
-                    </p>
-                    <div className="flex items-center gap-4 mt-2">
-                      <span className="text-xs text-muted-foreground">Resolution Quality:</span>
-                      <div className="flex items-center gap-2 flex-1">
-                        <Progress value={approval.quality} className="h-2" />
-                        <span className={`text-xs ${approval.quality > 50 ? "text-primary" : "text-yellow-400"}`}>
-                          {approval.quality > 50 ? "High" : "Low"} ({approval.quality}%)
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mt-3">
-                      <Button size="sm" className="gradient-primary text-primary-foreground">
-                        <Check className="h-4 w-4 mr-1" />
-                        Approve for Print
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <X className="h-4 w-4 mr-1" />
-                        Request New Photo
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Low Resolution Order */}
-            <div className="p-4 rounded-xl bg-card border border-border">
-              <div className="flex gap-4">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
-                  alt="Customer photo"
-                  className="w-24 h-24 rounded-lg object-cover opacity-50"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold">Order #8824</h3>
-                  <p className="text-sm text-muted-foreground">Acrylic Block 6x6</p>
-                  <p className="text-sm">
-                    Customer: <span className="text-primary">Sneha Reddy</span> • Uploaded 42m ago
-                  </p>
-                  <div className="flex gap-2 mt-3">
-                    <Button variant="outline" size="sm" className="text-muted-foreground">
-                      <X className="h-4 w-4 mr-1" />
-                      Ignore & Print
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Phone className="h-4 w-4 mr-1" />
-                      Contact Customer
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Live SLA Monitor */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Live SLA Monitor</h2>
-              <div className="flex items-center gap-2 text-sm text-primary">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                Live Updates
-              </div>
-            </div>
-
-            <div className="rounded-xl overflow-hidden border border-border">
-              <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=600&h=250&fit=crop"
-                alt="Map"
-                className="w-full h-48 object-cover"
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-lg bg-card border border-border">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                  <Truck className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Rider Mahesh P.</p>
-                  <p className="text-xs text-primary">8 mins to delivery</p>
-                </div>
-              </div>
-              <Badge className="bg-primary/20 text-primary">On Time</Badge>
-            </div>
-
-            <div className="p-3 rounded-lg bg-card border border-border">
-              <p className="text-sm font-medium mb-2">Active Riders</p>
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-8 w-8 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center"
-                  >
-                    <span className="text-xs font-medium text-primary">{i}</span>
-                  </div>
-                ))}
-                <div className="h-8 w-8 rounded-full bg-muted border-2 border-background flex items-center justify-center">
-                  <span className="text-xs text-muted-foreground">+2</span>
-                </div>
-              </div>
-            </div>
-
-            {/* SLA Risk Watchlist */}
-            <div className="p-4 rounded-xl bg-card border border-border">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                <h3 className="font-semibold">SLA Risk Watchlist</h3>
-              </div>
-              {riskOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-yellow-400" />
-                    <span className="text-sm">Order #{order.id}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{order.issue}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Critical Inventory & Customer Feedback */}
-        <div className="grid lg:grid-cols-2 gap-6 mt-6">
-          <div className="p-4 rounded-xl bg-card border border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Critical Inventory Levels</h3>
-              <Button variant="link" className="text-primary">Manage Stock</Button>
-            </div>
-            <div className="space-y-3">
-              {[
-                { name: "Oak Wood Frame 8x10", stock: 3, threshold: 10 },
-                { name: "Premium Gift Box Large", stock: 5, threshold: 15 },
-                { name: "Matte Photo Paper A4", stock: 12, threshold: 50 },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm">{item.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Progress value={(item.stock / item.threshold) * 100} className="w-24 h-2" />
-                    <span className="text-xs text-destructive">{item.stock} left</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-card border border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Customer Feedback</h3>
-              <Badge className="bg-primary/20 text-primary">4.9 ★</Badge>
-            </div>
-            <div className="space-y-3">
-              {[
-                { name: "Priya S.", rating: 5, comment: "Amazing quality and super fast delivery!" },
-                { name: "Rahul M.", rating: 4, comment: "Good product, packaging could be better." },
-              ].map((feedback, i) => (
-                <div key={i} className="p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">{feedback.name}</span>
-                    <div className="flex">
-                      {Array(feedback.rating).fill(0).map((_, j) => (
-                        <span key={j} className="text-yellow-400">★</span>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{feedback.comment}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {renderContent()}
       </main>
     </div>
   );

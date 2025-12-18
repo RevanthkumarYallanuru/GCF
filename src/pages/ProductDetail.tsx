@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 const sizes = [
   { id: "4x6", label: "A4 (4x6\")" },
@@ -20,8 +22,29 @@ const finishes = [
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { addItem } = useCart();
+  const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState("5x7");
   const [selectedFinish, setSelectedFinish] = useState("dark-wood");
+  const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
+
+  const handleAddToCart = () => {
+    const product = {
+      id: `eternal-frame-${selectedSize}-${selectedFinish}`,
+      name: "The Eternal Memory Frame",
+      price: 899,
+      image: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=600&h=600&fit=crop",
+      quantity: 1,
+      variant: `${sizes.find(s => s.id === selectedSize)?.label} - ${finishes.find(f => f.id === selectedFinish)?.label}`,
+      hasPhoto: !!uploadedPhoto,
+    };
+
+    addItem(product);
+    toast({
+      title: "Added to Cart",
+      description: "The Eternal Memory Frame has been added to your cart.",
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -174,12 +197,35 @@ const ProductDetail = () => {
               <div className="p-6 rounded-xl border border-dashed border-border bg-card/50 text-center space-y-3">
                 <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Drag & Drop your photo here</p>
+                  <p className="font-medium">
+                    {uploadedPhoto ? `Photo uploaded: ${uploadedPhoto.name}` : "Drag & Drop your photo here"}
+                  </p>
                   <p className="text-sm text-muted-foreground">Supports JPG, PNG (Max 10MB)</p>
                 </div>
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  Browse Files
-                </Button>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setUploadedPhoto(e.target.files?.[0] || null)}
+                    className="hidden"
+                    id="photo-upload"
+                  />
+                  <label htmlFor="photo-upload">
+                    <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground" asChild>
+                      <span>Browse Files</span>
+                    </Button>
+                  </label>
+                  {uploadedPhoto && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUploadedPhoto(null)}
+                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Urgency */}
@@ -189,7 +235,11 @@ const ProductDetail = () => {
               </div>
 
               {/* Add to Cart */}
-              <Button size="lg" className="w-full gradient-primary text-primary-foreground text-lg py-6">
+              <Button
+                size="lg"
+                className="w-full gradient-primary text-primary-foreground text-lg py-6"
+                onClick={handleAddToCart}
+              >
                 Add to Cart - ₹899
               </Button>
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Truck, CreditCard, Shield, Trash2, Plus, Minus } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -6,43 +7,124 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-
-const cartItems = [
-  {
-    id: "1",
-    name: "Personalized Gold Mosaic Frame",
-    variant: "Black Frame - 8x12 inches",
-    price: 1299,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100&h=100&fit=crop",
-    hasPhoto: true,
-  },
-  {
-    id: "2",
-    name: "Ferrero Rocher Box",
-    variant: "24 Pieces",
-    price: 999,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=100&h=100&fit=crop",
-    hasPhoto: false,
-  },
-];
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Checkout = () => {
-  const [quantities, setQuantities] = useState<Record<string, number>>(
-    Object.fromEntries(cartItems.map(item => [item.id, item.quantity]))
-  );
+  const { state, updateQuantity, removeItem, clearCart } = useCart();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * quantities[item.id], 0);
-  const shipping = 0;
+  const [deliveryInfo, setDeliveryInfo] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "Tirupati",
+    pincode: "",
+    deliveryType: "standard"
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [paymentInfo, setPaymentInfo] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    upiId: "",
+  });
+
+  const subtotal = state.total;
+  const shipping = deliveryInfo.deliveryType === "express" ? 100 : deliveryInfo.deliveryType === "same-day" ? 200 : 0;
   const gst = Math.round(subtotal * 0.05);
   const total = subtotal + shipping + gst;
+
+  const handleQuantityChange = (id: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeItem(id);
+    } else {
+      updateQuantity(id, newQuantity);
+    }
+  };
+
+  const handleDeliveryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setDeliveryInfo({
+      ...deliveryInfo,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePlaceOrder = () => {
+    // Validate form
+    if (!deliveryInfo.name || !deliveryInfo.email || !deliveryInfo.phone || !deliveryInfo.address) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all delivery details.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!paymentMethod) {
+      toast({
+        title: "Payment Method Required",
+        description: "Please select a payment method.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (paymentMethod === "card" && (!paymentInfo.cardNumber || !paymentInfo.expiryDate || !paymentInfo.cvv)) {
+      toast({
+        title: "Payment Information Required",
+        description: "Please fill in all card details.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (paymentMethod === "upi" && !paymentInfo.upiId) {
+      toast({
+        title: "UPI ID Required",
+        description: "Please enter your UPI ID.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate order placement
+    const orderId = `GCF-${Date.now()}`;
+    toast({
+      title: "Order Placed Successfully!",
+      description: `Your order ${orderId} has been placed. You'll receive a confirmation email shortly.`,
+    });
+
+    // Clear cart and redirect
+    clearCart();
+    navigate("/dashboard");
+  };
+
+  if (state.items.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-4">Add some gifts to your cart to continue shopping.</p>
+            <Button onClick={() => navigate("/")}>Continue Shopping</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 py-8">
-        <div className="container">
+        <div className="container max-w-6xl">
           {/* Progress Steps */}
           <div className="flex items-center justify-center gap-8 mb-8">
             {[
@@ -56,14 +138,11 @@ const Checkout = () => {
                 }`}>
                   <step.icon className="h-5 w-5" />
                 </div>
-                <span className={step.active ? "font-medium" : "text-muted-foreground"}>{step.label}</span>
-                {i < 2 && <div className="w-12 h-0.5 bg-border ml-4" />}
+                <span className={`text-sm ${step.active ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                  {step.label}
+                </span>
               </div>
             ))}
-            <Badge className="bg-primary/20 text-primary border-primary/30">
-              <Shield className="h-3 w-3 mr-1" />
-              100% Secure
-            </Badge>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -84,11 +163,23 @@ const Checkout = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm text-muted-foreground">Email Address</label>
-                    <Input placeholder="john@example.com" className="mt-1 bg-input" />
+                    <Input
+                      name="email"
+                      value={deliveryInfo.email}
+                      onChange={handleDeliveryChange}
+                      placeholder="john@example.com"
+                      className="mt-1 bg-input"
+                    />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">Phone Number</label>
-                    <Input placeholder="+91 98765-43210" className="mt-1 bg-input" />
+                    <Input
+                      name="phone"
+                      value={deliveryInfo.phone}
+                      onChange={handleDeliveryChange}
+                      placeholder="+91 98765-43210"
+                      className="mt-1 bg-input"
+                    />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -108,7 +199,12 @@ const Checkout = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm text-muted-foreground">First Name</label>
-                    <Input className="mt-1 bg-input" />
+                    <Input
+                      name="name"
+                      value={deliveryInfo.name}
+                      onChange={handleDeliveryChange}
+                      className="mt-1 bg-input"
+                    />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">Last Name</label>
@@ -117,20 +213,46 @@ const Checkout = () => {
                 </div>
                 <div>
                   <label className="text-sm text-muted-foreground">Address Line 1</label>
-                  <Input className="mt-1 bg-input" />
+                  <Input
+                    name="address"
+                    value={deliveryInfo.address}
+                    onChange={handleDeliveryChange}
+                    className="mt-1 bg-input"
+                  />
                 </div>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm text-muted-foreground">Pincode</label>
-                    <Input placeholder="517501" className="mt-1 bg-input" />
+                    <Input
+                      name="pincode"
+                      value={deliveryInfo.pincode}
+                      onChange={handleDeliveryChange}
+                      placeholder="517501"
+                      className="mt-1 bg-input"
+                    />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">City</label>
-                    <Input placeholder="Tirupati" className="mt-1 bg-input" />
+                    <Input
+                      name="city"
+                      value={deliveryInfo.city}
+                      onChange={handleDeliveryChange}
+                      placeholder="Tirupati"
+                      className="mt-1 bg-input"
+                    />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">State</label>
-                    <Input value="Andhra Pradesh" readOnly className="mt-1 bg-input" />
+                    <label className="text-sm text-muted-foreground">Delivery Type</label>
+                    <select
+                      name="deliveryType"
+                      value={deliveryInfo.deliveryType}
+                      onChange={handleDeliveryChange}
+                      className="mt-1 w-full px-3 py-2 rounded-lg bg-input border border-border"
+                    >
+                      <option value="standard">Standard (Free)</option>
+                      <option value="express">Express (₹100)</option>
+                      <option value="same-day">Same Day (₹200)</option>
+                    </select>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-primary">
@@ -171,8 +293,9 @@ const Checkout = () => {
                   ].map((method) => (
                     <button
                       key={method.id}
+                      onClick={() => setPaymentMethod(method.id)}
                       className={`relative p-4 rounded-xl border text-center transition-all hover:border-primary/50 ${
-                        method.recommended ? "border-primary bg-primary/10" : "border-border"
+                        paymentMethod === method.id ? "border-primary bg-primary/10" : method.recommended ? "border-primary bg-primary/10" : "border-border"
                       }`}
                     >
                       {method.recommended && (
@@ -185,6 +308,66 @@ const Checkout = () => {
                     </button>
                   ))}
                 </div>
+
+                {/* Payment Form */}
+                {paymentMethod === "card" && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <div>
+                      <label className="text-sm text-muted-foreground">Card Number</label>
+                      <Input
+                        placeholder="1234 5678 9012 3456"
+                        value={paymentInfo.cardNumber}
+                        onChange={(e) => setPaymentInfo(prev => ({ ...prev, cardNumber: e.target.value }))}
+                        className="mt-1 bg-input"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground">Expiry Date</label>
+                        <Input
+                          placeholder="MM/YY"
+                          value={paymentInfo.expiryDate}
+                          onChange={(e) => setPaymentInfo(prev => ({ ...prev, expiryDate: e.target.value }))}
+                          className="mt-1 bg-input"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground">CVV</label>
+                        <Input
+                          placeholder="123"
+                          value={paymentInfo.cvv}
+                          onChange={(e) => setPaymentInfo(prev => ({ ...prev, cvv: e.target.value }))}
+                          className="mt-1 bg-input"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === "upi" && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <div>
+                      <label className="text-sm text-muted-foreground">UPI ID</label>
+                      <Input
+                        placeholder="yourname@upi"
+                        value={paymentInfo.upiId}
+                        onChange={(e) => setPaymentInfo(prev => ({ ...prev, upiId: e.target.value }))}
+                        className="mt-1 bg-input"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      You will be redirected to your UPI app to complete the payment
+                    </p>
+                  </div>
+                )}
+
+                {paymentMethod === "netbanking" && (
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <p className="text-sm text-muted-foreground">
+                      You will be redirected to your bank's website to complete the payment
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -193,7 +376,7 @@ const Checkout = () => {
               <div className="p-6 rounded-xl bg-card border border-border space-y-4 sticky top-24">
                 <h2 className="text-lg font-semibold">Order Summary</h2>
 
-                {cartItems.map((item) => (
+                {state.items.map((item) => (
                   <div key={item.id} className="flex gap-3 py-3 border-b border-border">
                     <img
                       src={item.image}
@@ -202,20 +385,20 @@ const Checkout = () => {
                     />
                     <div className="flex-1 space-y-1">
                       <p className="font-medium text-sm">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.variant}</p>
+                      {item.variant && <p className="text-xs text-muted-foreground">{item.variant}</p>}
                       {item.hasPhoto && (
                         <Badge className="bg-primary/20 text-primary text-[10px]">Photo Approved</Badge>
                       )}
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setQuantities(q => ({...q, [item.id]: Math.max(1, q[item.id] - 1)}))}
+                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                           className="h-6 w-6 rounded bg-muted flex items-center justify-center hover:bg-muted/80"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="text-sm w-6 text-center">{quantities[item.id]}</span>
+                        <span className="text-sm w-6 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => setQuantities(q => ({...q, [item.id]: q[item.id] + 1}))}
+                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                           className="h-6 w-6 rounded bg-muted flex items-center justify-center hover:bg-muted/80"
                         >
                           <Plus className="h-3 w-3" />
@@ -223,8 +406,11 @@ const Checkout = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-primary">₹{item.price.toLocaleString()}</p>
-                      <button className="text-muted-foreground hover:text-destructive transition-colors mt-2">
+                      <p className="font-semibold text-primary">₹{(item.price * item.quantity).toLocaleString()}</p>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors mt-2"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -244,8 +430,10 @@ const Checkout = () => {
                     <span>₹{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping (Tirupati)</span>
-                    <span className="text-primary">Free</span>
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className={shipping === 0 ? "text-primary" : ""}>
+                      {shipping === 0 ? "Free" : `₹${shipping}`}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Net GST</span>
@@ -258,7 +446,11 @@ const Checkout = () => {
                   <span className="text-primary">₹{total.toLocaleString()}</span>
                 </div>
 
-                <Button size="lg" className="w-full gradient-primary text-primary-foreground">
+                <Button
+                  size="lg"
+                  className="w-full gradient-primary text-primary-foreground"
+                  onClick={handlePlaceOrder}
+                >
                   Pay ₹{total.toLocaleString()} →
                 </Button>
 

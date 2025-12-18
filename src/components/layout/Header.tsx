@@ -2,8 +2,15 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCart } from "@/contexts/CartContext";
+
+// Main navigation header component
+// Provides site branding, navigation links, search, and cart functionality
+// Sticky positioning for better user experience
 
 export function Header() {
+  const { state } = useCart();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4">
@@ -37,12 +44,16 @@ export function Header() {
               className="w-64 pl-10 bg-secondary border-border"
             />
           </div>
-          <Button variant="ghost" size="icon" className="relative">
-            <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-xs font-bold text-primary-foreground flex items-center justify-center">
-              2
-            </span>
-          </Button>
+          <Link to="/checkout">
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {state.itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-xs font-bold text-primary-foreground flex items-center justify-center">
+                  {state.itemCount > 99 ? '99+' : state.itemCount}
+                </span>
+              )}
+            </Button>
+          </Link>
           <Link to="/dashboard">
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />

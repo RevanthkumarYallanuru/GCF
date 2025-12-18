@@ -1,8 +1,13 @@
-import { Star, Heart } from "lucide-react";
+import { Star, Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+
+// Product card interface for type safety
+// Ensures consistent data structure across the application
 
 interface ProductCardProps {
   id: string;
@@ -29,6 +34,29 @@ export function ProductCard({
   deliveryInfo,
   colors,
 }: ProductCardProps) {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const product = {
+      id: id,
+      name: name,
+      price: price,
+      image: image,
+      quantity: 1,
+      variant: undefined,
+      hasPhoto: false,
+    };
+
+    addItem(product);
+    toast({
+      title: "Added to Cart",
+      description: `${name} has been added to your cart.`,
+    });
+  };
   return (
     <Link to={`/product/${id}`} className="group">
       <div className="relative overflow-hidden rounded-xl bg-card border border-border transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
@@ -97,6 +125,15 @@ export function ProductCard({
               ))}
             </div>
           )}
+
+          <Button
+            size="sm"
+            className="w-full gradient-primary text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to Cart
+          </Button>
         </div>
       </div>
     </Link>

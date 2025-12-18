@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
+// Site footer component with links, contact info, and social media
+// Provides comprehensive site navigation and business information
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-card">
