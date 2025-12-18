@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Gift, Heart, Cake, GraduationCap, Briefcase, Home } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useNavigate } from "react-router-dom";
 
 // Gift occasions data - centralized for better maintainability
 // Each occasion includes SEO-friendly descriptions and high-quality images
@@ -61,6 +62,13 @@ const occasions = [
 ];
 
 const Occasions = () => {
+  const navigate = useNavigate();
+
+  // Handle occasion selection - navigate to products page with filter
+  const handleOccasionClick = (occasionId: string) => {
+    navigate(`/products?occasion=${occasionId}`);
+  };
+
   // Structured data for SEO - helps search engines understand page content
   const structuredData = {
     "@context": "https://schema.org",
@@ -123,7 +131,9 @@ const Occasions = () => {
                 <CardContent className="p-6">
                   <CardTitle className="mb-2">{occasion.title} Gifts</CardTitle>
                   <CardDescription className="mb-4">{occasion.description}</CardDescription>
-                  <Button className="w-full">Explore {occasion.title} Gifts</Button>
+                  <Button className="w-full" onClick={() => handleOccasionClick(occasion.id)}>
+                    Explore {occasion.title} Gifts
+                  </Button>
                 </CardContent>
               </Card>
             );

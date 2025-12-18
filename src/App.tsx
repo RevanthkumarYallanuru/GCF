@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
+import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -24,6 +25,7 @@ const queryClient = new QueryClient();
 
 const routes = [
   { path: "/", element: <Index /> },
+  { path: "/products", element: <Products /> },
   { path: "/product/:id", element: <ProductDetail /> },
   { path: "/checkout", element: <Checkout /> },
   { path: "/dashboard", element: <Dashboard /> },

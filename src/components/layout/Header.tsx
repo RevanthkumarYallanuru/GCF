@@ -1,5 +1,5 @@
 import { Search, ShoppingCart, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
@@ -7,9 +7,16 @@ import { useCart } from "@/contexts/CartContext";
 // Main navigation header component
 // Provides site branding, navigation links, search, and cart functionality
 // Sticky positioning for better user experience
+// Hidden on admin pages for cleaner admin interface
 
 export function Header() {
   const { state } = useCart();
+  const location = useLocation();
+
+  // Hide header on admin pages for better admin experience
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -24,6 +31,9 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-8">
           <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
             Home
+          </Link>
+          <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            Products
           </Link>
           <Link to="/occasions" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Occasions
