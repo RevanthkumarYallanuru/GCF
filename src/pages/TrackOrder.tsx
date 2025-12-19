@@ -8,11 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Search, Package, Truck, CheckCircle, Clock, MapPin } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 // Order tracking component with real-time status updates
 // Includes comprehensive tracking information for customer experience
 
 const TrackOrder = () => {
+  useScrollTop();
   const [orderId, setOrderId] = useState("");
   const [trackingInfo, setTrackingInfo] = useState<{
     orderId: string;
@@ -98,7 +100,7 @@ const TrackOrder = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Track Your Order | Real-time Gift Delivery Updates | GCF Gifts</title>
         <meta name="description" content="Track your personalized gift orders with real-time updates. Monitor delivery status, estimated arrival times, and courier location in Tirupati." />
@@ -115,7 +117,8 @@ const TrackOrder = () => {
           {JSON.stringify(structuredData)}
         </script>
       </Helmet>
-      <main className="container py-12">
+      <Header />
+      <main className="container py-12 flex-1">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Track Your Order</h1>

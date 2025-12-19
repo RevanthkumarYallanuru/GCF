@@ -2,6 +2,7 @@ import { Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { heroContent } from "@/data/siteData";
 
 export function HeroSection() {
   const navigate = useNavigate();
@@ -13,16 +14,16 @@ export function HeroSection() {
           <div className="space-y-6">
             <Badge className="bg-primary/20 text-primary border-primary/30 px-4 py-1.5">
               <Truck className="h-4 w-4 mr-2" />
-              Tirupati Express Delivery
+              {heroContent.badgeText}
             </Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Instant Joy,{" "}
-              <span className="text-gradient">Delivered in Hours.</span>
+              {heroContent.headingPrefix}
+              <span className="text-gradient">{heroContent.headingHighlight}</span>
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-lg">
-              Forgot a special date? We've got you covered. Premium gifts delivered to Tirupati doorsteps in 2-4 hours.
+              {heroContent.subheading}
             </p>
 
             <div className="flex flex-wrap gap-4">

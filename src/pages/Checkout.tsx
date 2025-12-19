@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 const Checkout = () => {
+  useScrollTop();
   const { state, updateQuantity, removeItem, clearCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();

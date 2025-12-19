@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Filter, X, Grid, List } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 // Comprehensive product catalog focused on photo frames
 // Each product includes detailed specifications for different occasions and art styles
@@ -163,6 +164,7 @@ const allProducts = [
 ];
 
 const Products = () => {
+  useScrollTop();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 

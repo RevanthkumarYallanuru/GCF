@@ -6,8 +6,11 @@ import { OccasionsSection } from "@/components/home/OccasionsSection";
 import { PersonalizeSection } from "@/components/home/PersonalizeSection";
 import { TrendingSection } from "@/components/home/TrendingSection";
 import { Helmet } from "react-helmet";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 const Index = () => {
+  useScrollTop();
+
   return (
     <div className="min-h-screen">
       <Helmet>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter } from "lucide-react";
+import { siteMeta, socialLinks, contactInfo } from "@/data/siteData";
 
 // Site footer component with links, contact info, and social media
 // Provides comprehensive site navigation and business information
@@ -12,21 +13,23 @@ export function Footer() {
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
-                <span className="text-lg font-bold text-primary-foreground">G</span>
+                <span className="text-lg font-bold text-primary-foreground">
+                  {siteMeta.brandName.charAt(0)}
+                </span>
               </div>
-              <span className="text-xl font-bold">GCF Gifts</span>
+              <span className="text-xl font-bold">{siteMeta.brandName}</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Spreading joy in Tirupati with premium personalized gifts. Delivered with care, crafted with love.
+              {siteMeta.tagline}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={socialLinks.facebook} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={socialLinks.twitter} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
@@ -55,9 +58,17 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2">
-              <li className="text-sm text-muted-foreground">+91 98765-43210</li>
-              <li className="text-sm text-muted-foreground">hello@gcfgifts.com</li>
-              <li className="text-sm text-muted-foreground">Tirupati, Andhra Pradesh</li>
+              <li className="text-sm text-muted-foreground">
+                <a href={contactInfo.phoneHref} className="hover:text-primary transition-colors">
+                  {contactInfo.phoneDisplay}
+                </a>
+              </li>
+              <li className="text-sm text-muted-foreground">
+                <a href={contactInfo.emailHref} className="hover:text-primary transition-colors">
+                  {contactInfo.email}
+                </a>
+              </li>
+              <li className="text-sm text-muted-foreground">{contactInfo.city}</li>
             </ul>
           </div>
         </div>

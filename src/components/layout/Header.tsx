@@ -16,6 +16,13 @@ export function Header() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
+
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -40,19 +47,44 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+          <Link
+            to="/"
+            className={`text-sm font-medium transition-colors ${
+              isActive("/") ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
             Home
           </Link>
-          <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/products"
+            className={`text-sm font-medium transition-colors ${
+              isActive("/products") ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
             Products
           </Link>
-          <Link to="/occasions" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/occasions"
+            className={`text-sm font-medium transition-colors ${
+              isActive("/occasions") ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
             Occasions
           </Link>
-          <Link to="/same-day-delivery" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/same-day-delivery"
+            className={`text-sm font-medium transition-colors ${
+              isActive("/same-day-delivery") ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
             Same Day Delivery
           </Link>
-          <Link to="/track-order" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <Link
+            to="/track-order"
+            className={`text-sm font-medium transition-colors ${
+              isActive("/track-order") ? "text-primary" : "text-muted-foreground hover:text-primary"
+            }`}
+          >
             Track Order
           </Link>
         </nav>

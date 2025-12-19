@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Truck, Shield, Star, CheckCircle, Phone } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useScrollTop } from "@/hooks/use-scroll-top";
+import { contactInfo, whatsappConfig } from "@/data/siteData";
+import { useRef } from "react";
 
 // Key features of same-day delivery service
 // These highlight the competitive advantages for SEO and user understanding
@@ -56,6 +59,12 @@ const steps = [
 ];
 
 const SameDayDelivery = () => {
+  useScrollTop();
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const whatsappUrl = `https://wa.me/${whatsappConfig.number}?text=${encodeURIComponent(
+    whatsappConfig.defaultMessage
+  )}`;
   // SEO structured data for same-day delivery service
   const structuredData = {
     "@context": "https://schema.org",
@@ -76,7 +85,7 @@ const SameDayDelivery = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Same Day Gift Delivery | 2-4 Hour Delivery in Tirupati | GCF Gifts</title>
         <meta name="description" content="Order personalized gifts before 2 PM for same-day delivery within 2-4 hours in Tirupati. Premium quality gifts with secure packaging and dedicated couriers." />
@@ -93,7 +102,8 @@ const SameDayDelivery = () => {
           {JSON.stringify(structuredData)}
         </script>
       </Helmet>
-      <main>
+      <Header />
+      <main className="flex-1">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16">
           <div className="container">
@@ -110,9 +120,75 @@ const SameDayDelivery = () => {
                 premium gifts delivered to any address in Tirupati within 2-4 hours.
               </p>
               <div className="mt-8">
-                <Button size="lg" className="mr-4">Shop Same Day Gifts</Button>
-                <Button size="lg" variant="outline">Call Now: +91 98765 43210</Button>
+                <Button
+                  size="lg"
+                  className="mr-4"
+                  onClick={() => {
+                    productsRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
+                  Shop Same Day Gifts
+                </Button>
+                <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                  <Button size="lg" variant="outline">
+                    Call Now: {contactInfo.phoneDisplay}
+                  </Button>
+                </a>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Same-day eligible products */}
+        <section ref={productsRef} className="py-16">
+          <div className="container">
+            <h2 className="text-3xl font-bold text-center mb-3">Ready in 2-4 Hours</h2>
+            <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
+              These popular gifts are stocked in our Tirupati studio and can be prepared and
+              delivered the same day for most pin codes.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  name: "Express Walnut Photo Frame (8x10)",
+                  desc: "Upload a photo and get it framed today.",
+                  badge: "Same Day",
+                  image:
+                    "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop",
+                },
+                {
+                  name: "Chocolate Celebration Box",
+                  desc: "Curated dark & milk chocolates, gift-wrapped.",
+                  badge: "2-3 Hours",
+                  image:
+                    "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop",
+                },
+                {
+                  name: "Fresh Flower Bouquet + Card",
+                  desc: "Hand-picked flowers with a personalised message.",
+                  badge: "Same Day",
+                  image:
+                    "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400&h=300&fit=crop",
+                },
+              ].map((p) => (
+                <Card key={p.name} className="overflow-hidden">
+                  <img src={p.image} alt={p.name} className="h-40 w-full object-cover" />
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-1">
+                      <CardTitle className="text-base">{p.name}</CardTitle>
+                      <Badge className="bg-primary/15 text-primary border-primary/30 text-xs">
+                        {p.badge}
+                      </Badge>
+                    </div>
+                    <CardDescription>{p.desc}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button className="w-full" variant="outline">
+                      View in Products
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
@@ -196,7 +272,19 @@ const SameDayDelivery = () => {
                 <p className="text-muted-foreground mb-4">
                   Our customer service team is available 24/7 to assist with your same day delivery needs.
                 </p>
-                <Button>Call Customer Care</Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a href={contactInfo.phoneHref}>
+                    <Button className="w-full sm:w-auto">Call Customer Care</Button>
+                  </a>
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+                    >
+                      WhatsApp Us
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -209,9 +297,11 @@ const SameDayDelivery = () => {
             <p className="text-lg mb-8 opacity-90">
               Order now and make someone's day special with our same day delivery service.
             </p>
-            <Button size="lg" variant="secondary">
-              Start Shopping
-            </Button>
+            <a href="/products">
+              <Button size="lg" variant="secondary">
+                Start Shopping
+              </Button>
+            </a>
           </div>
         </section>
       </main>

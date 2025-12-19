@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Gift, Heart, Cake, GraduationCap, Briefcase, Home } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
+import { useScrollTop } from "@/hooks/use-scroll-top";
 
 // Gift occasions data - centralized for better maintainability
 // Each occasion includes SEO-friendly descriptions and high-quality images
@@ -62,6 +63,7 @@ const occasions = [
 ];
 
 const Occasions = () => {
+  useScrollTop();
   const navigate = useNavigate();
 
   // Handle occasion selection - navigate to products page with filter
@@ -147,7 +149,11 @@ const Occasions = () => {
             <p className="text-muted-foreground mb-6">
               Our gift experts are here to help you find the perfect gift for any occasion.
             </p>
-            <Button size="lg" variant="outline">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => navigate("/contact")}
+            >
               Contact Our Gift Experts
             </Button>
           </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Package,
   User,
@@ -20,6 +20,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Helmet } from "react-helmet";
 
 const menuItems = [
   { icon: Package, label: "My Orders", active: true },
@@ -85,6 +86,8 @@ const pastOrders = [
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("All Orders");
+  const [activeSection, setActiveSection] = useState("My Orders");
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -112,19 +115,23 @@ const Dashboard = () => {
               </div>
 
               <div className="rounded-xl bg-card border border-border overflow-hidden">
-                {menuItems.map((item, index) => (
-                  <button
-                    key={index}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                      item.active
-                        ? "bg-primary/10 text-primary border-l-2 border-primary"
-                        : "hover:bg-muted/50 text-muted-foreground"
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </button>
-                ))}
+                {menuItems.map((item, index) => {
+                  const isActive = activeSection === item.label;
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setActiveSection(item.label)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                        isActive
+                          ? "bg-primary/10 text-primary border-l-2 border-primary"
+                          : "hover:bg-muted/50 text-muted-foreground"
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <button className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-destructive transition-colors">
@@ -141,13 +148,19 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold">Hello, Arjun 👋</h1>
-                  <p className="text-muted-foreground">Here is what's happening with your gifts today.</p>
+                  <p className="text-muted-foreground">
+                    {activeSection === "My Orders"
+                      ? "Here is what's happening with your gifts today."
+                      : `Manage your ${activeSection.toLowerCase()}.`}
+                  </p>
                 </div>
                 <Button variant="outline" className="border-primary/50 text-primary">
                   Edit Profile
                 </Button>
               </div>
 
+              {activeSection === "My Orders" && (
+              <>
               {/* Active Order */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -214,7 +227,10 @@ const Dashboard = () => {
                         <img src={activeOrder.map} alt="Map" className="w-full h-32 object-cover" />
                       </div>
                       <p className="text-sm text-muted-foreground">{activeOrder.deliveryAddress}</p>
-                      <Button className="w-full gradient-primary text-primary-foreground">
+                      <Button
+                        className="w-full gradient-primary text-primary-foreground"
+                        onClick={() => navigate("/track-order")}
+                      >
                         <Truck className="h-4 w-4 mr-2" />
                         Track Live →
                       </Button>
@@ -280,19 +296,38 @@ const Dashboard = () => {
                       <div className="flex gap-2">
                         {order.status === "Action Needed" ? (
                           <>
-                            <Button variant="outline" size="sm" className="flex-1 text-destructive border-destructive/50">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-destructive border-destructive/50"
+                              onClick={() => window.alert(`Order ${order.id} will be cancelled (demo).`)}
+                            >
                               <X className="h-4 w-4 mr-1" /> Cancel Order
                             </Button>
-                            <Button size="sm" className="flex-1 gradient-primary text-primary-foreground">
+                            <Button
+                              size="sm"
+                              className="flex-1 gradient-primary text-primary-foreground"
+                              onClick={() => navigate("/upload-photo")}
+                            >
                               <Upload className="h-4 w-4 mr-1" /> Upload Photos
                             </Button>
                           </>
                         ) : (
                           <>
-                            <Button variant="outline" size="sm" className="flex-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => window.alert(`Invoice for ${order.id} would download here (demo).`)}
+                            >
                               <Eye className="h-4 w-4 mr-1" /> View Invoice
                             </Button>
-                            <Button variant="outline" size="sm" className="flex-1 border-primary/50 text-primary">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 border-primary/50 text-primary"
+                              onClick={() => window.alert(`Reordering ${order.id} (demo).`)}
+                            >
                               <RefreshCw className="h-4 w-4 mr-1" /> Reorder
                             </Button>
                           </>
@@ -309,11 +344,90 @@ const Dashboard = () => {
                   <h3 className="font-semibold">Need help with an order?</h3>
                   <p className="text-sm text-muted-foreground">Our support team in Tirupati is available 24/7.</p>
                 </div>
-                <Button className="gradient-primary text-primary-foreground">
+                <Button
+                  className="gradient-primary text-primary-foreground"
+                  onClick={() => navigate("/contact")}
+                >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Chat on WhatsApp
                 </Button>
               </div>
+              </>
+              )}
+
+              {activeSection === "Personal Details" && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Personal Details</h2>
+                  <div className="p-6 rounded-xl bg-card border border-border space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground">Full Name</label>
+                        <input className="mt-1 w-full rounded-lg bg-input border border-border px-3 py-2" defaultValue="Arjun K." />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground">Email</label>
+                        <input className="mt-1 w-full rounded-lg bg-input border border-border px-3 py-2" defaultValue="arjun@example.com" />
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground">Phone</label>
+                        <input className="mt-1 w-full rounded-lg bg-input border border-border px-3 py-2" defaultValue="+91 98765 43210" />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground">Birthday</label>
+                        <input type="date" className="mt-1 w-full rounded-lg bg-input border border-border px-3 py-2" />
+                      </div>
+                    </div>
+                    <Button className="gradient-primary text-primary-foreground">Save Changes</Button>
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "Address Book" && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Address Book</h2>
+                  <div className="p-6 rounded-xl bg-card border border-border space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">Tirupati Home Address</p>
+                      <Button size="sm" variant="outline">Edit</Button>
+                    </div>
+                    <p className="text-sm">
+                      12-3-45, Near Temple Road,
+                      <br />
+                      Tirupati, Andhra Pradesh - 517501
+                    </p>
+                    <Button variant="outline" size="sm">Add New Address</Button>
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "Payment Methods" && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Payment Methods</h2>
+                  <div className="p-6 rounded-xl bg-card border border-border space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Save your favourite payment methods for faster checkout.
+                    </p>
+                    <Button variant="outline" size="sm">Add UPI ID</Button>
+                    <Button variant="outline" size="sm">Add Card</Button>
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "Saved Photos" && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Saved Photos</h2>
+                  <div className="p-6 rounded-xl bg-card border border-border space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Photos you upload for personalised gifts will appear here for quick reuse.
+                    </p>
+                    <Button size="sm" onClick={() => navigate("/upload-photo")}>
+                      Upload New Photo
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

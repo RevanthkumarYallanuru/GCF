@@ -1,6 +1,7 @@
 import { Upload, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 export function PersonalizeSection() {
   return (
@@ -18,13 +19,17 @@ export function PersonalizeSection() {
               Upload your favorite memories and we'll print them on mugs, frames, and cushions. Delivered in 4 Hours.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button className="gradient-primary text-primary-foreground">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Photo
+              <Button asChild className="gradient-primary text-primary-foreground">
+                <Link to="/upload-photo">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Photo
+                </Link>
               </Button>
-              <Button variant="outline" className="border-primary/50">
-                <Eye className="h-4 w-4 mr-2" />
-                View Examples
+              <Button asChild variant="outline" className="border-primary/50">
+                <Link to="/view-examples">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Examples
+                </Link>
               </Button>
             </div>
           </div>
