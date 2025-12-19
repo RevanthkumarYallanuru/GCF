@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { contactInfo, socialLinks, whatsappConfig, siteMeta } from "@/data/siteData";
-import { Mail, MapPin, Phone, WhatsappLogo } from "lucide-react";
+import { Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useScrollTop } from "@/hooks/use-scroll-top";
 
@@ -106,7 +106,7 @@ const ContactPage = () => {
                     type="button"
                     className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white"
                   >
-                    <WhatsappLogo className="h-4 w-4" />
+                    <MessageCircle className="h-4 w-4" />
                     WhatsApp Us
                   </Button>
                 </a>
